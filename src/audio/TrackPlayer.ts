@@ -1,3 +1,4 @@
+import { claimPlayback, releasePlayback } from './playbackOwner'
 import * as Tone from 'tone'
 import { noteSchema, type MusicNote } from '../models/project'
 import type { PlaybackState } from './ChordPlayer'
@@ -58,8 +59,9 @@ export class TrackPlayer {
     if (this.disposed || this.state === 'playing' || !this.tracks.some(track => track.notes.length)) return
     if (!Number.isFinite(this.end) || this.end <= 0 || this.end > 65536 || this.bpm < 30 || this.bpm > 300 || this.tracks.length > 16 || this.tracks.reduce((count, track) => count + track.notes.length, 0) > 15000) throw new Error('La selección supera el límite del preview.')
     for (const track of this.tracks) for (const note of track.notes) { noteSchema.parse(note); if (note.start + note.duration > this.end + 1e-8) throw new Error('Una nota excede el final del preview.') }
+    claimPlayback(this)
     const request = ++this.request
-    await Tone.start()
+    try { await Tone.start() } catch (error) { if (request === this.request) this.stop(); throw error }
     if (this.disposed || request !== this.request) return
     if (!this.initialized) { try { this.build() } catch (error) { this.stop(); throw error } }
     const beat = this.getBeat()
@@ -76,6 +78,7 @@ export class TrackPlayer {
     this.state = 'paused'; this.onState(this.state)
   }
   stop() {
+    releasePlayback(this)
     this.request++
     this.graph++
     this.startBeat = 0
@@ -86,6 +89,11 @@ export class TrackPlayer {
       this.voices.clear(); this.initialized = false; this.endId = undefined
     }
     if (!this.disposed) { this.state = 'stopped'; this.onState(this.state) }
+  }
+  setTempo(bpm: number) {
+    if (!Number.isInteger(bpm) || bpm < 30 || bpm > 300) throw new Error('El tempo debe estar entre 30 y 300 BPM.')
+    this.bpm = bpm
+    if (this.initialized) Tone.getTransport().bpm.value = bpm
   }
   setLoop(loop: boolean) { this.loop = loop; if (this.initialized) Tone.getTransport().loop = loop }
   setMix(id: string, volume: number, muted: boolean) {

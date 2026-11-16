@@ -1,3 +1,4 @@
+import { claimPlayback, releasePlayback } from './playbackOwner'
 import * as Tone from 'tone'
 import { createMelodicVoice, type MelodicVoice } from './MelodicVoice'
 import type { SoundId } from '../sounds/catalog'
@@ -52,8 +53,9 @@ export class ChordPlayer {
   async play() {
     if (this.disposed || !this.chords.length || this.state === 'playing') return
     if (this.chords.length > 256 || this.chords.some(chord => !Number.isFinite(chord.start + chord.duration) || chord.start + chord.duration > 65536)) throw new Error('La pista supera el límite del preview de acordes.')
+    claimPlayback(this)
     const request = ++this.request
-    await Tone.start()
+    try { await Tone.start() } catch (error) { if (request === this.request) this.stop(); throw error }
     if (this.disposed || request !== this.request) return
     if (!this.initialized) {
       try { this.build() }
@@ -82,6 +84,7 @@ export class ChordPlayer {
   private finish() { if (!this.disposed) { this.state = 'stopped'; this.onState(this.state) } }
 
   stop() {
+    releasePlayback(this)
     this.request++
     if (this.initialized) {
       const transport = Tone.getTransport()

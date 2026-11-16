@@ -43,7 +43,7 @@ for i = 1, 3 do
   if redis.call('INCR', KEYS[i]) == 1 then redis.call('EXPIRE', KEYS[i], ARGV[i + 3]) end
 end
 return 0`
-async function reserveQuota(ip: string, dependencies: Dependencies, signal: AbortSignal) {
+export async function reserveQuota(ip: string, dependencies: Dependencies, signal: AbortSignal, namespace = 'lyrics') {
   const { env, fetcher, now } = dependencies
   const time = Math.floor(now() / 1000)
   const day = Math.floor(time / 86400)
@@ -53,7 +53,7 @@ async function reserveQuota(ip: string, dependencies: Dependencies, signal: Abor
   try {
     response = await fetcher(env.UPSTASH_REDIS_REST_URL!, {
       method: 'POST', headers: { Authorization: `Bearer ${env.UPSTASH_REDIS_REST_TOKEN}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(['EVAL', quotaScript, '3', `lyrics:v1:minute:${Math.floor(time / 60)}:${ipHash}`, `lyrics:v1:daily:${day}:${ipHash}`, `lyrics:v1:global:${day}`, '5', '20', '100', '60', String(dailyTtl), String(dailyTtl)]),
+      body: JSON.stringify(['EVAL', quotaScript, '3', `${namespace}:v1:minute:${Math.floor(time / 60)}:${ipHash}`, `${namespace}:v1:daily:${day}:${ipHash}`, `${namespace}:v1:global:${day}`, '5', '20', '100', '60', String(dailyTtl), String(dailyTtl)]),
       signal: AbortSignal.any([signal, AbortSignal.timeout(3000)]), redirect: 'error',
     })
     if (!response.ok) throw new Error('Quota store unavailable')

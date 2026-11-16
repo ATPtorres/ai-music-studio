@@ -28,7 +28,7 @@ LLM_MODEL=gemini-3.5-flash
 LLM_API_KEY=tu_clave_gratuita
 ```
 
-La clave se queda en el servidor de Vite y nunca llega al navegador. El endpoint `/api/agent` solo existe con `npm run dev` o `npm run preview`; un `dist/` estático no incluye el proxy. Sin variables configuradas, el agente muestra una guía y el resto del estudio funciona igual. Detalles, proveedores, seguridad y diagnóstico: [Agente de composición](docs/agent.md).
+La clave se queda en el servidor de Vite y nunca llega al navegador. El endpoint `/api/agent` funciona en Vite y en Netlify con la función de servidor incluida; un `dist/` estático no incluye el proxy. En Netlify también necesita cuotas persistentes Upstash y variables de servidor; consulta la guía del agente. Sin variables configuradas, el agente muestra una guía y el resto del estudio funciona igual. Detalles, proveedores, seguridad y diagnóstico: [Agente de composición](docs/agent.md).
 
 ## Probar la Fase 2
 
@@ -160,7 +160,7 @@ npm run build
 
 ## Datos y seguridad
 
-Un proyecto activo por navegador en localStorage, con importación validada hasta 2 MB. Sin sincronización remota ni entre pestañas. Exporta respaldos JSON: borrar los datos del navegador elimina su copia. No incluir credenciales en proyectos.
+Biblioteca local de hasta 30 canciones, un proyecto activo y hasta cinco puntos de restauración manuales por canción, con importación validada hasta 2 MB por proyecto. Sin sincronización remota ni entre pestañas. El límite real depende del espacio del navegador; si el guardado falla, se informa y se conserva el proyecto abierto. Exporta respaldos JSON: borrar los datos del navegador elimina su copia. No incluir credenciales en proyectos.
 
 El editor manual, la guía local y los motores musicales no requieren variables. Gemini es opcional: `GEMINI_API_KEY`, `GEMINI_MODEL`, `UPSTASH_REDIS_REST_URL` y `UPSTASH_REDIS_REST_TOKEN` se configuran solo en Netlify Functions. La IA permanece bloqueada sin cuotas persistentes y credenciales válidas. Nunca usar `VITE_` para secretos. `.env` está excluido de Git. Ver [Fase 5](docs/phase5.md).
 

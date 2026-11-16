@@ -23,7 +23,7 @@
   .app-shell .sidebar .brand small{display:none}
   .app-shell .sidebar .brand-mark{width:36px;height:36px}
   .app-shell .sidebar>:is(.workspace-label,.sidebar-divider,.tool-nav,.sidebar-bottom){display:none}
-  .app-shell .sidebar nav{position:fixed;inset:auto 0 0;z-index:50;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin:0;border-top:1px solid var(--studio-border);background:var(--studio-white);padding:6px max(4px,env(safe-area-inset-left,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(4px,env(safe-area-inset-right,0px))}
+  .app-shell .sidebar nav{position:fixed;inset:auto 0 0;z-index:50;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;margin:0;border-top:1px solid var(--studio-border);background:var(--studio-white);padding:6px max(4px,env(safe-area-inset-left,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(4px,env(safe-area-inset-right,0px))}
   .app-shell .sidebar nav .nav-item{display:flex;flex-direction:column;justify-content:center;gap:5px;min-height:58px;width:100%;padding:7px 2px;margin:0;border:0;font-size:11px;line-height:1.2;text-align:center;white-space:nowrap;font-weight:500}
   .app-shell .sidebar nav .nav-item svg{width:21px;height:21px;flex-shrink:0}
   .app-shell .sidebar nav .nav-dot{display:none}

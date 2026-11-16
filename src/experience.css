@@ -1,0 +1,19 @@
+.first-song,.saved-projects,.privacy-help { background: var(--studio-white); border: 1px solid var(--studio-border); padding: 24px; margin: 24px 0; line-height: 1.7; }
+.first-song h2,.saved-projects h2,.privacy-help h2 { font-size: 20px; margin: 0 0 12px; }
+.first-song ol { display: flex; flex-wrap: wrap; gap: 12px 24px; padding: 0; list-style: none; }
+.first-song p,.saved-projects p,.privacy-help p { color: var(--studio-muted); }
+.saved-project { border-top: 1px solid var(--studio-border); margin-top: 20px; padding-top: 12px; }
+.saved-project .library-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 12px 0; }
+.saved-project summary { cursor: pointer; padding: 12px 0; }
+.privacy-help a { text-decoration: underline; color: var(--studio-blue); }
+.agent-consent { border: 1px solid var(--studio-border); padding: 18px; margin: 16px 0; font-size: 14px; line-height: 1.7; }
+.agent-consent label { display: flex; align-items: flex-start; gap: 12px; }
+.agent-consent input { width: 20px; height: 20px; flex: 0 0 20px; margin-top: 3px; }
+.app-shell :is(.eyebrow,.hero-footnote,.module-phase,.module-card p,.main-footer) { font-size: 12px; }
+.app-shell .hero-footnote { line-height: 1.7; }
+@media(max-width:550px) {
+  .first-song,.saved-projects,.privacy-help { padding: 18px; }
+  .app-shell .sidebar nav .nav-item { white-space: normal; font-size: 10px; }
+  .first-song ol { display: block; }
+  .first-song .text-button { min-height: 44px; }
+}

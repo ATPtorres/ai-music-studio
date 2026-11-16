@@ -46,14 +46,16 @@ LLM_API_KEY=
 3. Reinicia `npm run dev`.
 4. Abre **Agente IA** en el lateral.
 
-Los límites y modelos gratuitos cambian con el tiempo: revisa las condiciones del proveedor antes de usar letras privadas. El agente envía solo el texto de la conversación y el resumen del proyecto, no las notas completas ni archivos.
+Los límites y modelos gratuitos cambian con el tiempo: revisa las condiciones del proveedor antes de usar letras privadas. El agente pide consentimiento antes de enviar la conversación y el resumen del proyecto: nombre, parámetros (incluidos tema y referencias), pistas, símbolos de acordes y cantidades de notas y letras. No envía audio, MIDI ni letras guardadas completas.
 
 > Si Gemini responde 404 «model no longer available», consulta la lista de modelos de tu cuenta (`GET https://generativelanguage.googleapis.com/v1beta/models`) y usa el `gemini-…-flash` más reciente que aparezca con `generateContent`.
 
 ## Seguridad
 
 - La clave se lee en el servidor de Vite y se añade a la petición desde `server/agent.ts`. **Nunca llega al navegador** y nunca debe llevar el prefijo `VITE_`.
-- El endpoint solo existe con `npm run dev` o `npm run preview`. Un `dist/` estático no tiene proxy: para publicar el agente harían falta funciones propias (Netlify, Cloudflare Workers, etc.).
+- El endpoint `/api/agent` existe en Vite local y en Netlify mediante `netlify/functions/agent.ts`. Un hosting exclusivamente estático requiere un backend equivalente.
+- En Netlify configura `LLM_MODEL`, `LLM_API_KEY`, `LLM_BASE_URL`, `UPSTASH_REDIS_REST_URL` y `UPSTASH_REDIS_REST_TOKEN` como variables de servidor. `URL` y `DEPLOY_PRIME_URL` las proporciona Netlify. Sin cuotas persistentes la IA remota queda desactivada.
+- El adaptador publicado valida origen e IP de contexto, reserva cuotas atómicas (5 peticiones/minuto/IP, 20/día/IP, 100/día global; una conversación puede usar varias peticiones) y limita cada llamada al proveedor a 20 segundos sin reintentos. El proxy local conserva sus reintentos.
 - El proxy limita tamaño de entrada/salida, valida mensajes y herramientas, aplica timeout y no reenvía cuerpos de error del proveedor.
 - El modelo no puede leer archivos, ejecutar código ni acceder a la red. Solo dispone de las herramientas musicales.
 

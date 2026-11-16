@@ -34,6 +34,7 @@ const examples = [
 export default function AgentWorkbench({ project, replace, saveStatus }: Props) {
   const [messages, setMessages] = useState<UiMessage[]>([])
   const [input, setInput] = useState('')
+  const [consent, setConsent] = useState(false)
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState<AgentStatus | null>(null)
   const [snapshot, setSnapshot] = useState<MusicProject | null>(null)
@@ -49,7 +50,7 @@ export default function AgentWorkbench({ project, replace, saveStatus }: Props) 
     fetch('/api/agent', { signal: abort.signal })
       .then(response => response.ok ? response.json() as Promise<AgentStatus> : Promise.reject(new Error('sin proxy')))
       .then(setStatus)
-      .catch(() => { if (!abort.signal.aborted) setStatus({ configured: false, model: '', endpoint: '', hint: 'El agente solo funciona con `npm run dev` o `npm run preview`. En un sitio estático no hay proxy para proteger la clave.' }) })
+      .catch(() => { if (!abort.signal.aborted) setStatus({ configured: false, model: '', endpoint: '', hint: 'No se pudo conectar con la asistencia. Inténtalo más tarde o continúa con los generadores locales.' }) })
     return () => abort.abort()
   }, [])
   useEffect(() => { transcript.current?.scrollTo({ top: transcript.current.scrollHeight }) }, [messages])
@@ -57,7 +58,7 @@ export default function AgentWorkbench({ project, replace, saveStatus }: Props) 
 
   const send = async (text: string) => {
     const value = text.trim()
-    if (!value || busy || !status?.configured) return
+    if (!value || busy || !status?.configured || !consent) return
     const currentRun = ++run.current
     const abort = new AbortController()
     controller.current = abort
@@ -99,6 +100,7 @@ export default function AgentWorkbench({ project, replace, saveStatus }: Props) 
   }
 
   const ready = Boolean(status?.configured)
+  const canSend = ready && consent
   return <section className="agent-workbench" aria-label="Agente de composición">
     <p className="agent-save" role="status">{saveStatus}</p>
     <div className="agent-intro">
@@ -106,26 +108,24 @@ export default function AgentWorkbench({ project, replace, saveStatus }: Props) 
       <div>
         <div className="eyebrow">AGENTE DE COMPOSICIÓN</div>
         <h2>Pídelo en palabras. El proyecto se actualiza.</h2>
-        <p>El modelo elige herramientas locales para generar acordes, líneas, batería y estructura. Tu música no sale del navegador: solo viaja el texto de la conversación.</p>
+        <p>El modelo elige herramientas locales para generar acordes, líneas, batería y estructura. Con tu permiso, se envían al proveedor la conversación y un resumen del proyecto para elegir las herramientas. El audio y los archivos MIDI se quedan en tu navegador.</p>
       </div>
       <span className={`agent-state ${ready ? 'ready' : 'off'}`}><span className="status-dot"/>{ready ? `Conectado · ${status?.model}` : 'Sin configurar'}</span>
     </div>
 
     {status && !ready && <div className="agent-setup" role="status">
-      <div className="agent-setup-title"><AlertTriangle size={18}/><strong>Activa el agente en 2 minutos (gratis)</strong></div>
-      <p>{status.hint || 'Añade LLM_MODEL y LLM_API_KEY a tu archivo .env y reinicia `npm run dev`.'}</p>
-      <pre>{`# .env  (ejemplo con Gemini; también vale Groq, OpenRouter u Ollama)
-LLM_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai
-LLM_MODEL=gemini-3.5-flash
-LLM_API_KEY=tu_clave_gratuita`}</pre>
-      <p className="agent-muted">La clave se queda en el servidor de Vite. Nunca se envía al navegador. Sin estas variables, el resto del estudio sigue funcionando igual.</p>
+      <div className="agent-setup-title"><AlertTriangle size={18}/><strong>Asistencia remota no disponible</strong></div>
+      <p>La conexión de IA aún no está disponible en este estudio.</p>
+
+      <p className="agent-muted">La asistencia necesita estar activada en el servidor por quien administra el estudio. Puedes seguir usando los generadores locales.</p>
     </div>}
 
+    {ready && <div className="agent-consent"><p>Proveedor: {status?.endpoint}. Se enviarán tu petición, la conversación reciente y un resumen con nombres, parámetros, tema, referencias, acordes y cantidades de notas y letras. No se envían audio ni letras guardadas completas. El tratamiento remoto depende del proveedor.</p><label><input type="checkbox" checked={consent} disabled={busy} onChange={e => setConsent(e.target.checked)}/>Acepto enviar estos datos al proveedor para esta sesión del agente.</label></div>}
     <div className="agent-chat" ref={transcript} aria-live="polite">
       {messages.length === 0 && <div className="agent-empty">
         <Sparkles size={20}/>
         <p>¿Qué quieres construir? Por ejemplo:</p>
-        <div className="agent-examples">{examples.map(example => <button key={example} className="agent-example" disabled={!ready || busy} onClick={() => void send(example)}>{example}</button>)}</div>
+        <div className="agent-examples">{examples.map(example => <button key={example} className="agent-example" disabled={!canSend || busy} onClick={() => void send(example)}>{example}</button>)}</div>
         <small>El agente trabaja sobre el proyecto abierto. Puedes deshacer la última petición.</small>
       </div>}
       {messages.map(message => message.role === 'step'
@@ -136,12 +136,12 @@ LLM_API_KEY=tu_clave_gratuita`}</pre>
 
     <div className="agent-composer">
       <label htmlFor="agent-input">Tu petición</label>
-      <textarea id="agent-input" value={input} maxLength={2000} rows={3} disabled={busy || !ready} placeholder={ready ? 'Ej.: crea una balada en Re menor a 70 BPM con piano, bajo y batería suave…' : 'Configura el agente para escribir aquí…'} onChange={event => setInput(event.target.value)} onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); void send(input) } }}/>
+      <textarea id="agent-input" value={input} maxLength={2000} rows={3} disabled={busy || !canSend} placeholder={ready ? 'Ej.: crea una balada en Re menor a 70 BPM con piano, bajo y batería suave…' : 'Configura el agente para escribir aquí…'} onChange={event => setInput(event.target.value)} onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); void send(input) } }}/>
       <div className="agent-actions">
         <span className="agent-hint">Enter envía · Mayús+Enter salta línea</span>
         {busy && <button className="button secondary" onClick={stop}><X size={15}/>Detener</button>}
         {snapshot && !busy && <button className="button secondary" onClick={undo}><Undo2 size={15}/>Deshacer último cambio</button>}
-        <button className="button primary" disabled={!ready || busy || !input.trim()} onClick={() => void send(input)}><ArrowUp size={15}/>Enviar</button>
+        <button className="button primary" disabled={!canSend || busy || !input.trim()} onClick={() => void send(input)}><ArrowUp size={15}/>Enviar</button>
       </div>
     </div>
 

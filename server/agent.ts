@@ -21,6 +21,8 @@ interface Dependencies {
   fetcher?: typeof fetch
   /** Inyectable para que las pruebas no esperen de verdad. */
   sleep?: (ms: number) => Promise<void>
+  attempts?: number
+  timeoutMs?: number
 }
 const defaultSleep = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms))
 
@@ -100,7 +102,7 @@ function cleanTools(value: unknown): unknown[] | undefined {
   return value
 }
 
-export function createAgentHandler({ env, fetcher = fetch, sleep = defaultSleep }: Dependencies) {
+export function createAgentHandler({ env, fetcher = fetch, sleep = defaultSleep, attempts = MAX_ATTEMPTS, timeoutMs = UPSTREAM_TIMEOUT_MS }: Dependencies) {
   return async (request: Request): Promise<Response> => {
     const config = resolveAgentConfig(env)
     try {
@@ -140,7 +142,7 @@ export function createAgentHandler({ env, fetcher = fetch, sleep = defaultSleep 
       let failure: { status: number; error: string; message: string; retryAfter?: string } | null = null
 
       for (const model of models) {
-        for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+        for (let attempt = 1; attempt <= attempts; attempt++) {
           if (attempt > 1) await sleep(RETRY_DELAYS_MS[Math.min(attempt - 2, RETRY_DELAYS_MS.length - 1)])
           let response: Response
           try {
@@ -149,7 +151,7 @@ export function createAgentHandler({ env, fetcher = fetch, sleep = defaultSleep 
               headers: { 'Content-Type': 'application/json', ...(config.apiKey ? { Authorization: `Bearer ${config.apiKey}` } : {}) },
               body: JSON.stringify({ ...baseUpstream, model }),
               redirect: 'error',
-              signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
+              signal: AbortSignal.any([request.signal, AbortSignal.timeout(timeoutMs)]),
             })
           } catch (error) {
             const timeout = error instanceof Error && error.name === 'TimeoutError'

@@ -1,0 +1,37 @@
+.section-artwork {
+  display: block;
+  object-fit: contain;
+  background: #dfc4e9;
+  pointer-events: none;
+  user-select: none;
+  border-radius: 18px;
+}
+.app-shell .page-heading { align-items: center; }
+.app-shell .page-heading > div { flex: 1; min-width: 0; }
+.section-artwork--heading { width: 144px; height: 144px; flex: 0 0 144px; }
+.section-artwork--card { width: 100%; height: 150px; margin-bottom: 18px; }
+.app-shell .hero { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.app-shell .hero-content { flex: 1; min-width: 0; }
+.section-artwork--hero { width: 280px; height: 280px; flex: 0 0 280px; }
+@media (prefers-reduced-motion: no-preference) {
+  .section-artwork--heading, .section-artwork--hero {
+    animation: artwork-arrive 480ms cubic-bezier(.22, 1, .36, 1) both;
+  }
+}
+@keyframes artwork-arrive {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 1100px) {
+  .section-artwork--heading { width: 112px; height: 112px; flex-basis: 112px; }
+  .section-artwork--hero { width: 210px; height: 210px; flex-basis: 210px; }
+}
+@media (max-width: 650px) {
+  .app-shell .page-heading { flex-wrap: wrap; }
+  .app-shell .page-heading > div { flex-basis: calc(100% - 100px); }
+  .section-artwork--heading { width: 80px; height: 80px; flex-basis: 80px; border-radius: 12px; }
+  .app-shell .page-heading > .button { font-size: 11px; }
+  .app-shell .hero { flex-direction: column; align-items: stretch; }
+  .section-artwork--hero { width: 100%; height: 180px; flex-basis: auto; }
+  .section-artwork--card { height: 120px; margin-bottom: 12px; border-radius: 12px; }
+}

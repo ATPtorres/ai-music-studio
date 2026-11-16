@@ -23,6 +23,30 @@ const tracks: PreviewTrack[] = [
   { id: 'b', kind: 'bass', notes: [{ pitch: 33, start: 0, duration: 0.8, velocity: 90 }], volume: 0.5, muted: false },
 ]
 describe('Preview sincronizado (audio simulado)', () => {
+  it('cede el reloj a otro reproductor y su dispose posterior no interrumpe al nuevo', async () => {
+    const first = new TrackPlayer(vi.fn())
+    const second = new TrackPlayer(vi.fn())
+    first.configure(tracks, 100, 4); second.configure(tracks, 100, 4)
+    await first.play(); await second.play()
+    expect(first.state).toBe('stopped')
+    expect(second.state).toBe('playing')
+    fake.transport.stop.mockClear()
+    first.dispose()
+    expect(fake.transport.stop).not.toHaveBeenCalled()
+    second.dispose()
+  })
+  it('cambia tempo en vivo conservando la posición y las partes programadas', async () => {
+    const player = new TrackPlayer(vi.fn())
+    player.configure(tracks, 100, 4); await player.play()
+    fake.transport.ticks = 192
+    player.setTempo(140)
+    expect(player.state).toBe('playing')
+    expect(player.getBeat()).toBe(1)
+    expect(fake.transport.bpm.value).toBe(140)
+    expect(fake.parts).toHaveLength(3)
+    expect(() => player.setTempo(0)).toThrow()
+    player.dispose()
+  })
   beforeEach(() => { vi.clearAllMocks(); fake.voices.length = 0; fake.gains.length = 0; fake.parts.length = 0; fake.failPart = false; fake.start.mockResolvedValue(); fake.transport.schedule.mockReturnValue(8); fake.transport.ticks = 0 })
   it('agenda las pistas con un solo reloj y convierte negras a segundos y velocidad', async () => {
     const player = new TrackPlayer(vi.fn())
