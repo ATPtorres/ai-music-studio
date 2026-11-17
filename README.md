@@ -15,7 +15,7 @@ Abre la URL que imprime Vite (normalmente http://127.0.0.1:5173/). Aunque la car
 
 ## Agente de composición (opcional y gratis)
 
-El proyecto incluye un agente que traduce peticiones en lenguaje natural a las herramientas locales del estudio: configura el proyecto, genera acordes, melodía, bajo, batería y estructura, y permite deshacer el último cambio. **No necesita Gemini ni Netlify**: usa un proveedor compatible con OpenAI a través de un proxy local.
+El proyecto incluye un agente que traduce peticiones en lenguaje natural a las herramientas locales del estudio: configura el proyecto, genera acordes, melodía, bajo, batería y estructura, y permite deshacer el último cambio. **No necesita Gemini ni ningún hosting externo**: usa un proveedor compatible con OpenAI a través de un proxy local.
 
 1. Copia `.env.example` a `.env` y elige un proveedor con *tool calling*: Gemini, Groq u OpenRouter en su nivel gratuito, o Ollama en local.
 2. Rellena `LLM_BASE_URL`, `LLM_MODEL` y `LLM_API_KEY` (Ollama no necesita clave).
@@ -28,7 +28,7 @@ LLM_MODEL=gemini-3.5-flash
 LLM_API_KEY=tu_clave_gratuita
 ```
 
-La clave se queda en el servidor de Vite y nunca llega al navegador. El endpoint `/api/agent` funciona en Vite y en Netlify con la función de servidor incluida; un `dist/` estático no incluye el proxy. En Netlify también necesita cuotas persistentes Upstash y variables de servidor; consulta la guía del agente. Sin variables configuradas, el agente muestra una guía y el resto del estudio funciona igual. Detalles, proveedores, seguridad y diagnóstico: [Agente de composición](docs/agent.md).
+La clave se queda en el servidor de Vite y nunca llega al navegador. El endpoint `/api/agent` funciona en Vite, en Netlify (`netlify/functions/agent.ts`) y en Vercel (`api/agent.ts`); un `dist/` estático no incluye el proxy. En Netlify y Vercel también necesita cuotas persistentes Upstash y variables de servidor; consulta la guía del agente. Sin variables configuradas, el agente muestra una guía y el resto del estudio funciona igual. Detalles, proveedores, seguridad y diagnóstico: [Agente de composición](docs/agent.md).
 
 ## Probar la Fase 2
 
@@ -93,9 +93,9 @@ Detalles, compatibilidad y siguientes entregas en [Fase 4.5](docs/phase4.5.md); 
 2. Indica un tema y prepara una **guía local**, sin cuentas ni claves. Es un ejercicio de escritura por secciones, no una letra generada por IA.
 3. Revisa el borrador y pulsa **Aplicar borrador al proyecto**. Se pide confirmación antes de reemplazar texto; las pistas y los compases existentes se conservan.
 4. Edita, recarga y exporta/importa JSON para comprobar la persistencia. **Descargar letra TXT** exporta solo el texto.
-5. Gemini es opcional y necesita Netlify Functions y cuotas persistentes en Redis. Sin esa configuración, los fallos producen una guía local identificada; no se sobrescribe texto automáticamente.
+5. Gemini es opcional y necesita funciones de servidor (Netlify o Vercel) y cuotas persistentes en Redis. Sin esa configuración, los fallos producen una guía local identificada; no se sobrescribe texto automáticamente.
 
-Detalles y activación: [Fase 5](docs/phase5.md). Evidencia y limitaciones: [verificación](docs/verification-phase5.md). No se ha probado todavía una llamada real a Gemini ni un despliegue Netlify: en esta sesión no hay cuentas ni credenciales configuradas.
+Detalles y activación: [Fase 5](docs/phase5.md). Evidencia y limitaciones: [verificación](docs/verification-phase5.md). No se ha probado todavía una llamada real a Gemini ni un despliegue en Netlify o Vercel: en esta sesión no hay cuentas ni credenciales configuradas.
 
 ## Probar la Fase 6
 
@@ -130,7 +130,7 @@ Genera la pista y usa su selector de sonido, o cámbialo desde la mezcla de Estr
 - `src/agent/` y `src/features/agent/`: herramientas musicales, bucle del agente, trazas, deshacer y configuración del proveedor.
 - `src/sounds/`, `src/audio/MelodicVoice.ts` y `src/audio/drumProfiles.ts`: catálogo validado, selectores y recetas de síntesis compartidas.
 - `src/arrangement/`, `src/features/arrangement/` y `src/midi/exportArrangement.ts`: disposición por secciones, clips vinculados, transporte/mezcla y MIDI completo.
-- `src/features/lyrics/`, `src/services/ai/`, `server/lyrics.ts` y `netlify/functions/lyrics.ts`: edición de letras, proveedores y endpoint con cuotas persistentes.
+- `src/features/lyrics/`, `src/services/ai/`, `server/lyrics.ts`, `netlify/functions/lyrics.ts` y `api/lyrics.ts`: edición de letras, proveedores y endpoint con cuotas persistentes.
 - `src/knowledge/` y `src/features/knowledge/`: catálogo validado, búsqueda, selector, contexto acotado y explorador.
 - `src/music/knowledgeHarmony.ts`: préstamos, dominantes aplicadas y conducción de voces.
 - `src/models/`: formato v1, esquemas estrictos y tipos musicales.
@@ -156,15 +156,15 @@ npm run lint
 npm run build
 ```
 
-211 pruebas en 32 archivos: biblioteca/selector, armonía ampliada, contexto acotado, teoría, esquemas/persistencia, armonía, melodías/bajos, patrones y swing, generación/edición en DOM simulado, transporte/kit con Tone simulado, letras/proveedores/límites del servidor, arreglo por secciones, selección de sonidos, lectura binaria de MIDI individual/multipista, herramientas del agente y proxy del agente. Consulta [verificación de Fase 6](docs/verification-phase6.md) para distinguir lo comprobado de la escucha, los móviles físicos y la importación en DAW pendientes. La validación de 0.7.0 se ejecutó en Linux; consulta también la [verificación del editor visual](docs/visual-arrangement.md#verificación).
+234 pruebas en 39 archivos: biblioteca/selector, armonía ampliada, contexto acotado, teoría, esquemas/persistencia, armonía, melodías/bajos, patrones y swing, generación/edición en DOM simulado, transporte/kit con Tone simulado, letras/proveedores/límites del servidor, arreglo por secciones, selección de sonidos, lectura binaria de MIDI individual/multipista, herramientas del agente, proxy del agente y adaptador de Vercel. Consulta [verificación de Fase 6](docs/verification-phase6.md) para distinguir lo comprobado de la escucha, los móviles físicos y la importación en DAW pendientes. La validación de 0.7.0 se ejecutó en Linux; consulta también la [verificación del editor visual](docs/visual-arrangement.md#verificación).
 
 ## Datos y seguridad
 
 Biblioteca local de hasta 30 canciones, un proyecto activo y hasta cinco puntos de restauración manuales por canción, con importación validada hasta 2 MB por proyecto. Sin sincronización remota ni entre pestañas. El límite real depende del espacio del navegador; si el guardado falla, se informa y se conserva el proyecto abierto. Exporta respaldos JSON: borrar los datos del navegador elimina su copia. No incluir credenciales en proyectos.
 
-El editor manual, la guía local y los motores musicales no requieren variables. Gemini es opcional: `GEMINI_API_KEY`, `GEMINI_MODEL`, `UPSTASH_REDIS_REST_URL` y `UPSTASH_REDIS_REST_TOKEN` se configuran solo en Netlify Functions. La IA permanece bloqueada sin cuotas persistentes y credenciales válidas. Nunca usar `VITE_` para secretos. `.env` está excluido de Git. Ver [Fase 5](docs/phase5.md).
+El editor manual, la guía local y los motores musicales no requieren variables. Gemini es opcional: `GEMINI_API_KEY`, `GEMINI_MODEL`, `UPSTASH_REDIS_REST_URL` y `UPSTASH_REDIS_REST_TOKEN` se configuran solo en las funciones de servidor (Netlify Functions o `api/` en Vercel). La IA permanece bloqueada sin cuotas persistentes y credenciales válidas. Nunca usar `VITE_` para secretos. `.env` está excluido de Git. Ver [Fase 5](docs/phase5.md).
 
-Más documentación: [arquitectura y riesgos](docs/architecture.md), [plan por fases](docs/roadmap.md), [GitHub y Netlify](docs/deployment.md).
+Más documentación: [arquitectura y riesgos](docs/architecture.md), [plan por fases](docs/roadmap.md), [GitHub, Netlify y Vercel](docs/deployment.md).
 
 ### Ajustes de audio del 20 de octubre de 2026
 

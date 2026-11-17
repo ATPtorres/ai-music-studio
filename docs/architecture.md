@@ -29,7 +29,7 @@ src/
 docs/                      arquitectura, fases, despliegue
 ```
 
-En cada fase se extraerán componentes visuales de App a `components/` y se crearán `features/chords`, `features/melody`, `features/bass`, `features/drums`, `features/lyrics` y `features/arrangement`, únicamente al implementar esas funciones. Motores puros en `music/engines/`, reproducción en `audio/`, escritura MIDI en `midi/`, proveedor opcional en `services/ai/` y endpoint en `netlify/functions/`. Estos directorios futuros no contienen implementaciones falsas.
+En cada fase se extraerán componentes visuales de App a `components/` y se crearán `features/chords`, `features/melody`, `features/bass`, `features/drums`, `features/lyrics` y `features/arrangement`, únicamente al implementar esas funciones. Motores puros en `music/engines/`, reproducción en `audio/`, escritura MIDI en `midi/`, proveedor opcional en `services/ai/` y endpoints en `netlify/functions/` (Netlify) y `api/` (Vercel). Estos directorios futuros no contienen implementaciones falsas.
 
 Dependencias: UI → estado/servicios → modelos y motores puros. Audio y exportación consumen las mismas notas validadas. No generar MIDI a partir de texto libre de Gemini.
 

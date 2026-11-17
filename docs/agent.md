@@ -53,8 +53,8 @@ Los límites y modelos gratuitos cambian con el tiempo: revisa las condiciones d
 ## Seguridad
 
 - La clave se lee en el servidor de Vite y se añade a la petición desde `server/agent.ts`. **Nunca llega al navegador** y nunca debe llevar el prefijo `VITE_`.
-- El endpoint `/api/agent` existe en Vite local y en Netlify mediante `netlify/functions/agent.ts`. Un hosting exclusivamente estático requiere un backend equivalente.
-- En Netlify configura `LLM_MODEL`, `LLM_API_KEY`, `LLM_BASE_URL`, `UPSTASH_REDIS_REST_URL` y `UPSTASH_REDIS_REST_TOKEN` como variables de servidor. `URL` y `DEPLOY_PRIME_URL` las proporciona Netlify. Sin cuotas persistentes la IA remota queda desactivada.
+- El endpoint `/api/agent` existe en Vite local, en Netlify mediante `netlify/functions/agent.ts` y en Vercel mediante `api/agent.ts`. Un hosting exclusivamente estático requiere un backend equivalente.
+- En Netlify y en Vercel configura `LLM_MODEL`, `LLM_API_KEY`, `LLM_BASE_URL`, `UPSTASH_REDIS_REST_URL` y `UPSTASH_REDIS_REST_TOKEN` como variables de servidor. Netlify aporta `URL` y `DEPLOY_PRIME_URL`; Vercel deriva el origen del propio sitio de las cabeceras `host` y `x-forwarded-proto` en cada invocación. Sin cuotas persistentes la IA remota queda desactivada.
 - El adaptador publicado valida origen e IP de contexto, reserva cuotas atómicas (5 peticiones/minuto/IP, 20/día/IP, 100/día global; una conversación puede usar varias peticiones) y limita cada llamada al proveedor a 20 segundos sin reintentos. El proxy local conserva sus reintentos.
 - El proxy limita tamaño de entrada/salida, valida mensajes y herramientas, aplica timeout y no reenvía cuerpos de error del proveedor.
 - El modelo no puede leer archivos, ejecutar código ni acceder a la red. Solo dispone de las herramientas musicales.

@@ -24,6 +24,7 @@
     "src",
     "vite.config.ts",
     "server",
-    "netlify/functions"
+    "netlify/functions",
+    "api"
   ]
 }
