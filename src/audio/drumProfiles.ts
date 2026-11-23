@@ -7,15 +7,15 @@ interface DrumProfile {
 /** Original synth recipes inspired by broad machine characteristics, without samples. */
 export const drumProfiles: Record<DrumSound, DrumProfile> = {
   'kit-707': {
-    kick: { pitchDecay: 0.035, octaves: 5, decay: 0.17, release: 0.04, volume: -10, note: 'C1', duration: 0.12 }, noise: 'white',
-    snare: [1100, 0.12, -17], clap: [1800, 0.09, -15], closed: [7000, 0.035, -22], open: [6500, 0.22, -22], shaker: [4000, 0.045, -24],
+    kick: { pitchDecay: 0.035, octaves: 5, decay: 0.17, release: 0.04, volume: -3, note: 'C1', duration: 0.12 }, noise: 'white',
+    snare: [1100, 0.12, -3], clap: [1800, 0.09, -3], closed: [7000, 0.035, -3], open: [6500, 0.22, -3], shaker: [4000, 0.045, -3],
   },
   'kit-808': {
-    kick: { pitchDecay: 0.065, octaves: 4, decay: 0.7, release: 0.18, volume: -12, note: 'A0', duration: 0.65 }, noise: 'pink',
-    snare: [900, 0.2, -14], clap: [1350, 0.19, -13], closed: [8200, 0.025, -17], open: [7200, 0.42, -18], shaker: [5000, 0.07, -19],
+    kick: { pitchDecay: 0.065, octaves: 4, decay: 0.7, release: 0.18, volume: -3, note: 'A0', duration: 0.65 }, noise: 'pink',
+    snare: [900, 0.2, -3], clap: [1350, 0.19, -3], closed: [8200, 0.025, -3], open: [7200, 0.42, -3], shaker: [5000, 0.07, -3],
   },
   'kit-909': {
-    kick: { pitchDecay: 0.022, octaves: 7, decay: 0.28, release: 0.07, volume: -10, note: 'D1', duration: 0.24 }, noise: 'white',
-    snare: [1600, 0.17, -14], clap: [2200, 0.13, -14], closed: [9800, 0.055, -19], open: [9000, 0.32, -20], shaker: [6200, 0.035, -22],
+    kick: { pitchDecay: 0.022, octaves: 7, decay: 0.28, release: 0.07, volume: -3, note: 'D1', duration: 0.24 }, noise: 'white',
+    snare: [1600, 0.17, -3], clap: [2200, 0.13, -3], closed: [9800, 0.055, -3], open: [9000, 0.32, -3], shaker: [6200, 0.035, -3],
   },
 }

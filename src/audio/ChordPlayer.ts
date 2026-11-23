@@ -9,6 +9,7 @@ export type PlaybackState = 'stopped' | 'playing' | 'paused'
 export class ChordPlayer {
   private synth?: MelodicVoice
   private gain?: Tone.Gain
+  private limiter?: Tone.Limiter
   private part?: Tone.Part<{ pitches: number[]; duration: number }>
   private endId?: number
   private initialized = false
@@ -42,7 +43,8 @@ export class ChordPlayer {
     const end = Math.max(...this.chords.map(chord => chord.start + chord.duration))
     transport.loopStart = 0
     transport.loopEnd = `${end * transport.PPQ}i`
-    this.gain = new Tone.Gain(this.volume).toDestination()
+    this.limiter = new Tone.Limiter(-3).toDestination()
+    this.gain = new Tone.Gain(this.volume).connect(this.limiter)
     this.synth = createMelodicVoice('chords', this.sound, this.gain)
     this.part = new Tone.Part((time, chord: { pitches: number[]; duration: number }) => {
       this.synth?.triggerAttackRelease(chord.pitches.map(pitch => Tone.Frequency(pitch, 'midi').toFrequency()), chord.duration * 60 / this.bpm, time, 0.7)
@@ -94,6 +96,7 @@ export class ChordPlayer {
       this.part?.dispose()
       this.synth?.dispose()
       this.gain?.dispose()
+      this.limiter?.dispose()
       this.initialized = false
     }
     this.finish()

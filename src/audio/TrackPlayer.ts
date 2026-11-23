@@ -13,6 +13,7 @@ interface Voice { synth?: MelodicVoice; drums?: DrumKit; gain: Tone.Gain; part?:
 export class TrackPlayer {
   private tracks: PreviewTrack[] = []
   private voices = new Map<string, Voice>()
+  private limiter?: Tone.Limiter
   private startBeat = 0
   private graph = 0
   private endId?: number
@@ -41,8 +42,9 @@ export class TrackPlayer {
     const transport = Tone.getTransport()
     transport.stop(); transport.ticks = 0; transport.bpm.value = this.bpm
     transport.loop = this.loop; transport.loopStart = 0; transport.loopEnd = previewTime(this.end, transport.PPQ)
+    this.limiter = new Tone.Limiter(-3).toDestination()
     for (const track of this.tracks) {
-      const gain = new Tone.Gain(track.muted ? 0 : track.volume).toDestination()
+      const gain = new Tone.Gain(track.muted ? 0 : track.volume).connect(this.limiter)
       // Register each resource before building the next one so failures can be cleaned up.
       const voice: Voice = { gain }
       this.voices.set(track.id, voice)
@@ -86,7 +88,7 @@ export class TrackPlayer {
       const transport = Tone.getTransport(); transport.stop(); transport.ticks = 0
       if (this.endId !== undefined) transport.clear(this.endId)
       for (const voice of this.voices.values()) { voice.part?.dispose(); voice.synth?.dispose(); voice.drums?.dispose(); voice.gain.dispose() }
-      this.voices.clear(); this.initialized = false; this.endId = undefined
+      this.voices.clear(); this.limiter?.dispose(); this.limiter = undefined; this.initialized = false; this.endId = undefined
     }
     if (!this.disposed) { this.state = 'stopped'; this.onState(this.state) }
   }
